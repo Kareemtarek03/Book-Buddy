@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BookBuddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">BookBuddy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin">
+                            <i class="bi bi-speedometer2"></i> Admin Dashboard
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div id="user-menu">
+                        <span class="navbar-text me-3" id="username-display"></span>
+                        <button class="btn btn-outline-light" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <h2><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+        
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="users-tab" data-bs-toggle="tab" href="#users" role="tab">
+                    <i class="bi bi-people"></i> Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="reviews-tab" data-bs-toggle="tab" href="#reviews" role="tab">
+                    <i class="bi bi-chat-square-text"></i> Reviews
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="books-tab" data-bs-toggle="tab" href="#books" role="tab">
+                    <i class="bi bi-book"></i> Books
+                </a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="adminTabContent">
+            <!-- Users Tab -->
+            <div class="tab-pane fade show active" id="users" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Admin Status</th>
+                                <th>Reviews</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Book</th>
+                                <th>Rating</th>
+                                <th>Content</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewsTableBody">
+                            <!-- Reviews will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Books Tab -->
+            <div class="tab-pane fade" id="books" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Manage Books</h4>
+                    <button class="btn btn-primary" onclick="showAddBookModal()">
+                        <i class="bi bi-plus-circle"></i> Add Book
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Category</th>
+                                <th>Rating</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="booksTableBody">
+                            <!-- Books will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div class="modal fade" id="addBookModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-book-form">
+                        <div class="mb-3">
+                            <label for="book-isbn" class="form-label">ISBN (Optional - to fetch from Google Books)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="book-isbn" placeholder="Enter ISBN to fetch book details">
+                                <button class="btn btn-outline-secondary" type="button" onclick="fetchBookByISBN()">
+                                    <i class="bi bi-search"></i> Fetch
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="book-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="book-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="book-author" class="form-label">Author</label>
+                            <input type="text" class="form-control" id="book-author" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="book-category" class="form-label">Category</label>
+                            <select class="form-select" id="book-category" required>
+                                <option value="">Select a category</option>
+                                <option value="fiction">Fiction</option>
+                                <option value="non-fiction">Non-Fiction</option>
+                                <option value="science">Science</option>
+                                <option value="technology">Technology</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="book-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="book-description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="book-image" class="form-label">Image URL</label>
+                            <input type="url" class="form-control" id="book-image">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Book</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html> 

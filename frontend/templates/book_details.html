@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details - BookBuddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
+            --hover-bg: #f8f9fa;
+        }
+
+        [data-bs-theme="dark"] {
+            --bg-primary: #212529;
+            --bg-secondary: #343a40;
+            --text-primary: #f8f9fa;
+            --text-secondary: #adb5bd;
+            --border-color: #495057;
+            --card-bg: #343a40;
+            --hover-bg: #495057;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        .review-card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        .form-control, .form-select {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .rating-display {
+            color: #ffd700;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s;
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .theme-toggle i {
+            font-size: 1.2rem;
+        }
+
+        .review-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .rating-display {
+            color: #ffd700;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">BookBuddy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/books">Books</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div id="auth-buttons">
+                        <button class="btn btn-outline-light me-2" onclick="showLoginModal()">Login</button>
+                        <button class="btn btn-primary" onclick="showRegisterModal()">Register</button>
+                    </div>
+                    <div class="d-none" id="user-menu">
+                        <span class="navbar-text me-3" id="username-display"></span>
+                        <button class="btn btn-outline-light" onclick="logout()">Logout</button>
+                    </div>
+                    <button class="btn theme-toggle" id="themeToggle">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Book Details -->
+            <div class="col-md-4">
+                <img id="bookImage" src="" alt="Book Cover" class="img-fluid rounded shadow">
+            </div>
+            <div class="col-md-8">
+                <h1 id="bookTitle" class="mb-3"></h1>
+                <h4 id="bookAuthor" class="text-muted mb-4"></h4>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Category:</strong> <span id="bookCategory"></span></p>
+                        <p><strong>Published Date:</strong> <span id="bookPublishedDate"></span></p>
+                        <p><strong>Publisher:</strong> <span id="bookPublisher"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Pages:</strong> <span id="bookPages"></span></p>
+                        <p><strong>Language:</strong> <span id="bookLanguage"></span></p>
+                        <p><strong>ISBN:</strong> <span id="bookIsbn"></span></p>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Description</h5>
+                    <p id="bookDescription"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>Reviews</h3>
+                
+                <!-- Review Form (Only shown when logged in) -->
+                <div id="reviewForm" class="card mb-4" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Write a Review</h5>
+                        <form id="addReviewForm">
+                            <div class="mb-3">
+                                <label for="ratingSelect" class="form-label">Rating</label>
+                                <select class="form-select" id="ratingSelect" name="rating" required>
+                                    <option value="">Select a rating</option>
+                                    <option value="5">5 Stars - Excellent</option>
+                                    <option value="4">4 Stars - Very Good</option>
+                                    <option value="3">3 Stars - Good</option>
+                                    <option value="2">2 Stars - Fair</option>
+                                    <option value="1">1 Star - Poor</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="reviewContent" class="form-label">Your Review</label>
+                                <textarea class="form-control" id="reviewContent" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Login Required Message -->
+                <div id="loginRequired" class="alert alert-info mb-4">
+                    Please <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">login</a> to write a review.
+                </div>
+
+                <!-- Reviews List -->
+                <div id="reviewsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="loginUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="loginUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <div class="alert alert-danger d-none" id="loginError"></div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label for="registerUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="registerUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" required>
+                        </div>
+                        <div class="alert alert-danger d-none" id="registerError"></div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/book_details.js') }}"></script>
+    <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('themeToggle');
+            const html = document.documentElement;
+            const icon = themeToggle.querySelector('i');
+
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.setAttribute('data-bs-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                html.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                icon.className = theme === 'light' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+            }
+        });
+    </script>
+</body>
+</html> 
