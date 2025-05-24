@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # BookBuddy - Interactive Online Bookstore
 
 BookBuddy is a dynamic, multi-role online bookstore that allows users to browse, filter, and review books, while enabling admins to manage the bookstore's content.
@@ -110,3 +111,6 @@ BookBuddy/
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details. 
+=======
+# Book-Buddy
+>>>>>>> 6fe04fcd40d995f5df03e9ff849770e632637b2b

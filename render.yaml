@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: bookbuddy
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.app:app
+    envVars:
+      - key: FLASK_APP
+        value: backend.app
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bookbuddy-db
+          property: connectionString
+
+databases:
+  - name: bookbuddy-db
+    databaseName: bookbuddy
+    user: bookbuddy
+    plan: free 

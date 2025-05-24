@@ -6,6 +6,10 @@ import os
 from dotenv import load_dotenv
 import requests
 from sqlalchemy import or_
+from flask_cors import CORS
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from datetime import datetime, timedelta
 
 # Load environment variables
 load_dotenv()
@@ -13,17 +17,22 @@ load_dotenv()
 app = Flask(__name__, 
     template_folder='../frontend/templates',
     static_folder='../frontend/static')
+CORS(app)
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:112003@localhost/bookbuddy'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///bookbuddy.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-secret-key')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
 # Initialize extensions
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 
 # Models
 class User(UserMixin, db.Model):
